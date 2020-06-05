@@ -2,6 +2,7 @@
 import spotipy
 import spotipy.util as util
 import pandas as pd
+import time
 
 
 class Spotipy():
@@ -10,24 +11,17 @@ class Spotipy():
         """Spotipy Init."""
         self.configs = configs
         self.get_authorization()
+        self.batch_limit = 100
         self.columns = [
             "id",
-            # "url",
             "name",
-            # "artist",
-            # "album",
-            # "explicit",
+            "artist",
             "popularity",
-            # "duration_ms",
             "key",
-            # "mode",
-            # "time_signature",
-            # "danceability",
             "energy",
             "speechiness",
             "acousticness",
             "instrumentalness",
-            # "liveness",
             "valence",
             "tempo"
         ]
@@ -64,29 +58,38 @@ class Spotipy():
                     features = self.spotipy.audio_features([track['id']])
                     trackInfo = [
                         track['id'],
-                        # track['external_urls']['spotify'],
                         track['name'],
-                        # track['artists'][0]['name'],
-                        # track['album']['name'],
-                        # track['explicit'],
+                        track['artists'][0]['name'],
                         track['popularity'],
-                        # track['duration_ms'],
                         features[0]['key'],
-                        # features[0]['mode'],
-                        # features[0]['time_signature'],
-                        # features[0]['danceability'],
                         features[0]['energy'],
                         features[0]['speechiness'],
                         features[0]['acousticness'],
                         features[0]['instrumentalness'],
-                        # features[0]['liveness'],
                         features[0]['valence'],
                         features[0]['tempo']
                     ]
                     trackList.append(trackInfo)
             if tracks['next']:
-                break
                 tracks = self.spotipy.next(tracks)
             else:
                 break
         return pd.DataFrame(data=trackList, columns=self.columns)
+
+    def add_tracks_in_playlist(self, tracks, playlist_id):
+        """Add a list of tracks id in a given playlist."""
+        if len(tracks) > self.batch_limit:
+            for i in range(0, len(tracks), self.batch_limit):
+                self.spotipy.user_playlist_add_tracks(
+                    user=self.configs['user'],
+                    playlist_id=playlist_id,
+                    tracks=tracks[(i):(self.batch_limit + i)]
+                )
+        else:
+            self.spotipy.user_playlist_add_tracks(
+                user=self.configs['user'],
+                playlist_id=playlist_id,
+                tracks=tracks
+            )
+        print('{} tracks have been added into the playlist {}'
+              .format(len(tracks), playlist_id))
