@@ -130,7 +130,6 @@ dmypy.json
 
 # secrets
 credentials.py
-.cache-marcelodof
 
 # vscode
 .vscode
