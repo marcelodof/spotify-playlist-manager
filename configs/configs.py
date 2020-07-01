@@ -21,7 +21,7 @@ def get_secrets(region_name='us-east-2'):
     ).get('SecretString')
     spotify_configs = {
         'user': 'marcelodof',
-        'scope': 'user-library-read',
+        'scope': 'user-library-read playlist-modify-public',
         'redirect_uri': 'http://localhost:8888/callback',
     }
     return {**spotify_configs, **json.loads(secrets)}
