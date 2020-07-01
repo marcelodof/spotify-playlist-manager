@@ -1,6 +1,7 @@
 """Playlist Manager Class."""
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report
 from services.spotipy.spotipy import Spotipy
 import pandas as pd
@@ -53,8 +54,15 @@ class PlaylistManager():
     def run_classification(self):
         """Return dataframe with classification."""
         print('Running Classification...')
+        # Scalling
+        ss = StandardScaler()
+        df_features_scalled = pd.DataFrame(
+            ss.fit_transform(self.model_df[self.features]),
+            columns=self.features
+            )
+
         # Splitting Dataset
-        df_features = self.model_df[self.features]
+        df_features = df_features_scalled
         df_labels = self.model_df['label']
         df_features_train, df_features_test, df_labels_train, df_labels_test \
             = train_test_split(
